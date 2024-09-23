@@ -1,16 +1,19 @@
 from django.shortcuts import render
-from rest_framework import generics, mixins
+from rest_framework import authentication, generics, mixins, permissions
 from .models import Product
 from .serializers import ProductSerializer
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
+from .permissions import IsStaffEditorPermission
 
 # Create your views here.
 
 class ProductListCreateAPIView(generics.ListCreateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
+    authentication_classes = [authentication.SessionAuthentication]
+    permission_classes = [permissions.IsAdminUser, IsStaffEditorPermission]
 
     def perform_create(self, serializer):  #overriding the built in perform_create class
         title = serializer.validated_data.get('title')
@@ -76,14 +79,18 @@ class ProductMixinView(
     # Handles POST requests for creating a new product
     
     def post(self, request, *args, **kwargs):
+
         return self.create(request, *args, **kwargs)
     
 
     # Handles PUT/PATCH requests for updating a product
     def put(self, request, *args, **kwargs):
+
         return self.update(request, *args, **kwargs)
 
+
     def patch(self, request, *args, **kwargs):
+
         return self.partial_update(request, *args, **kwargs)
     
 
